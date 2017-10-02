@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>VueFire Todo App Demo</title>
+    <script src = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.0.0/firebase.js"></script>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="jquery.slabtext.min.js"></script>
+    <script src="../../dist/vuefire.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Oswald:300,500,600,700" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Archivo+Black" rel="stylesheet">
+    <link rel = "stylesheet" href= "reset.css">
+    <link rel = "stylesheet" href= "slabtext.css">
+    <link rel = "stylesheet" href= "style.css">
+
+  </head>
+  <body>
+
+    <!--
+    Before running this example, make sure to:
+
+    1. cd path/to/vuefire
+    2. npm install
+    3. npm run build
+
+    Then you can open this file in your browser.
+    If you just prefer to see this example with
+    the latest published version of VueFire, you
+    play with the code in this fiddle:
+
+    https://jsfiddle.net/posva/wtyop5jy/
+    -->
+
+<div id="app">
+<div class="container">
+  <div class="item header"><div class = "title">POEMS BY TITLE: </div>
+<br>
+    <ul>
+        <li v-for="poem in poems">
+      
+         
+          {{poem.title}}
+         
+                   <button @click="removePoem(poem)">X</button> 
+          
+<!--  <button @click="removePoem(item['.key'])">X</button> -->
+        </li>
+      </ul></div>
+  <div class="item sidebar">
+    <div id = "responsive_headline"> 
+The Transformation of silence into langauge and action
+      <!-- non slabtext -->
+
+
+      <!-- slabtext solution -->
+<!--       <span class = "slabtext">The Transformation Of </span>
+  <span class = "slabtext">Silence </span>
+    <span class = "slabtext"> Into Language</span>
+  <span class = "slabtext">And action </span> -->
+    </div>
+
+  </div>
+  <div class="item content-1">
+    
+
+     <!--  <input
+        v-model.5trim="newTodoText"
+        @keyup.enter="addTodo"
+        placeholder="Add new todo"
+      > -->
+
+      <form id="form" class="form-inline" v-on:submit.prevent="addPoem">
+          <div class="form-group">
+            <label for="bookTitle">NAME:</label>
+            <input type="text" id="bookTitle" class="form-control" v-model="newPoem.title">
+          </div>
+          <div class="form-group">
+            <label for="stageOne" >Why do we speak?</label>
+            <input type="text" id="qOne" class="form-control" v-model="newPoem.stageOne">
+          </div>
+        
+<!--         stage 2 -->
+          <div class="form-group">
+           <label for=""> Of what are we afraid?</label>
+            <input type="text" id="qTwo" class="form-control" v-model="newPoem.stageTwo">
+          </div>
+<!--           stage 3 -->
+          <div class="form-group">
+           <label for="">What have we survivied?</label>
+            <input type="text" id="qThree" class="form-control" v-model="newPoem.stageThree">
+          </div>
+<!--           stage 4 -->
+          <div class="form-group">
+           <label for="">How have we-do we resist?</label>
+            <input type="text" id="qFour" class="form-control" v-model="newPoem.stageFour">
+          </div>
+<!--           stage 5 -->
+          <div class="form-group">
+           <label for="">How are we healing?</label>
+            <input type="text" id="qFive" class="form-control" v-model="newPoem.stageFive">
+          </div>
+         <!--  <div class="form-group">
+            <label for="bookUrl">Url:</label>
+            <input type="text" id="bookUrl" class="form-control" v-model="newPoem.url">
+          </div> -->
+          <input type="submit" class="btn btn-primary" value="Add Poem">
+        </form>
+    
+    </div>
+  <div id = "stage" class="item content-2"></div>
+<!--   <div class="item content-3">Content-3</div> -->
+ <!--  <div class="item footer">footer</div>
+</div> -->
+      
+      
+  </div> 
+
+  <script>
+   // Function to slabtext the H1 headings
+    function slabTextHeadlines() {
+        $("").slabText({
+            // Don't slabtext the headers if the viewport is under 380px
+            "viewportBreakpoint":380
+        });
+    };
+    // Load fonts using google font loader
+    var WebFontConfig = {
+        google: { families: [ 'Open+Sans:400,700:latin', 'Oswald:700:latin' ] },
+        // slabText the headers when the font has finished loading (or not)
+        fontactive: slabTextHeadlines,
+        fontinactive: slabTextHeadlines
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = 'https://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })();
+</script>
+
+    <script>
+      /* global Vue, firebase */
+      let config = {
+    apiKey: "AIzaSyBdE-iB5O2hcURVf2bH2ac0XOd-FEIZaA4",
+    authDomain: "vue-database-3411c.firebaseapp.com",
+    databaseURL: "https://vue-database-3411c.firebaseio.com",
+    projectId: "vue-database-3411c",
+    storageBucket: "vue-database-3411c.appspot.com",
+    messagingSenderId: "660447029173"
+  };
+  
+let db = firebase.initializeApp(config).database()
+// let db = app.database()
+let poemsRef = db.ref('poems')
+
+// export default {
+//   name: 'app',
+//   firebase: {
+//     poems: poemsRef
+//   },
+  
+//   data () {
+//     return {
+//       newPoem: {
+//           title: '',
+//           lines: ''
+//       }
+//     }
+//   },
+
+//create an array of the questions
+var prompts = ["Why do we speak?", "Of what are we afraid?", "What have we survivied?","How have we-do we resist?",  "How are we healing?"]
+
+   var app = new Vue({
+        el: '#app',
+        data: {
+
+         newPoem: {
+          title: '',
+          stageOne: '',
+          stageTwo: '',
+          stageThree: '',
+          stageFour: '',
+          stageFive: '',
+
+
+}
+        },
+        firebase: {
+           poems: poemsRef
+          // todos: todosRef.limitToLast(25)
+        },
+
+
+    methods: {
+      addPoem: function () {
+        poemsRef.push(this.newPoem);
+
+        this.newPoem.title = '';
+        this.newPoem.stageOne = '';
+        this.newPoem.stageTwo = '';
+        this.newPoem.stageThree = '';
+        this.newPoem.stageFour = '';
+        this.newPoem.stageFive = '';
+        // this.newPoem.url = 'http://';
+//create an element for app.poems[0].title
+
+//create elements pairing? prompts with responses on poety enter & show a view of the poem as just the words regular styole in the sidebar
+// $('#stage').append(document.createTextNode(app.poems[0].title))
+console.log(app.poems[app.poems.length-1])
+
+var daPoem = app.poems[app.poems.length-1]
+
+var prompts = ["Why do we speak?", "Of what are we afraid?", "What have we survivied?","How have we-do we resist?",  "How are we healing?"]
+
+var responses = [daPoem.stageOne,daPoem.stageTwo,daPoem.stageThree, daPoem.stageFour,daPoem.stageFive]
+
+responses.forEach(function(thing, index){
+  var everythingSelector= $('#stage')
+
+
+var lineHolder = document.createElement('div')
+// lineHolder.parent(everythingSelector)
+// everythingSelector.append(lineHolder)  
+lineHolder.id+="holder"+index;
+lineHolder.className+='lineHolder'
+
+var promptHolder = document.createElement('div')
+promptHolder.className += 'promptHolder';
+
+var promptText = document.createElement("p");
+promptValue = document.createTextNode(prompts[index])
+
+promptText.appendChild(promptValue)
+
+promptHolder.append(promptText)
+
+lineHolder.append(promptHolder)
+
+
+//create a text element from thing
+var textContainer = document.createElement('div')
+textContainer.className+='textContainer'
+  textContainer.id+= "textContainer"+index
+//create a text element with the prompt
+var newDiv = document.createElement("p");
+  
+// newDiv.id('thing'+index)
+      var newContent = document.createTextNode(thing);
+//apend them both to lineHolder
+
+newDiv.appendChild(newContent)
+textContainer.append(newDiv)
+lineHolder.append(textContainer)
+everythingSelector.append(lineHolder)
+
+
+console.log(thing)
+})
+
+// $('#stage').append(document.createTextNode(daPoem.title))
+
+//create elements for each prompt and each response and put them in a holder element
+
+
+
+// $('#stage').append(document.createTextNode(daPoem.stageOne))
+// $('#stage').append(document.createTextNode(daPoem.stageTwo))
+// $('#stage').append(document.createTextNode(daPoem.stageThree))
+// $('#stage').append(document.createTextNode(daPoem.stageFour))
+// $('#stage').append(document.createTextNode(daPoem.stageFive))
+
+
+      },
+      removePoem: function (poem) {
+        poemsRef.child(poem['.key']).remove()
+        // toastr.success('Poem removed successfully')
+      }
+    },
+  
+})
+
+
+
+
+    </script>
+  </body>
+</html>
